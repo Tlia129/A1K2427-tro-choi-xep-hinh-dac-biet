@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>A Little Gift For You</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Playfair+Display:wght@500;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#f4a6c1;--rose:#e0709a;--deep:#a94571;--lilac:#e6d9f7;--gold:#d9b66a;--ink:#6b3a53}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{font-family:Quicksand,system-ui,sans-serif;color:var(--ink);background:linear-gradient(160deg,#fff3f6,#f6e9fb 55%,#fff4e6);overflow:hidden}
+#bg{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
+.fl{position:absolute;bottom:-40px;opacity:0;color:var(--pink);animation:fl linear infinite}
+@keyframes fl{10%{opacity:.55}100%{transform:translateY(-112vh) rotate(360deg);opacity:0}}
+.screen{position:fixed;inset:0;display:none;overflow-y:auto;padding:18px 16px;z-index:2}
+.screen.active{display:flex;animation:in .7s both}
+.screen.out{animation:out .45s both}
+@keyframes in{from{opacity:0;transform:scale(.96) translateY(14px)}}
+@keyframes out{to{opacity:0;transform:scale(1.04)}}
+.wrap{margin:auto;width:100%;max-width:520px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
+h1{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:clamp(28px,8vw,44px);color:var(--deep);line-height:1.1}
+h2{font-family:'Playfair Display',Georgia,serif;font-size:clamp(22px,6vw,32px);color:var(--deep)}
+.script{font-family:'Dancing Script',cursive;font-size:clamp(26px,7vw,36px);color:var(--rose)}
+.sub{font-size:16px;line-height:1.5;max-width:420px}
+.how{font-size:13px;line-height:1.5;opacity:.75;max-width:400px}
+.btn{border:0;cursor:pointer;font:700 15px Quicksand,sans-serif;letter-spacing:.06em;padding:13px 30px;border-radius:999px;color:#fff;background:linear-gradient(135deg,#f58fb3,#c9669b);box-shadow:0 8px 20px rgba(200,90,140,.35);transition:transform .25s,box-shadow .25s,opacity .25s}
+.btn:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 12px 26px rgba(200,90,140,.45)}
+.btn:active{transform:scale(.96)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.btn.ghost{background:#fff;color:var(--deep);box-shadow:0 4px 14px rgba(200,90,140,.2);padding:10px 24px}
+.btn.big{font-size:17px;padding:15px 38px}
+.admin{width:100%;background:rgba(255,255,255,.65);border-radius:16px;padding:8px 14px;font-size:13px;text-align:left}
+.admin summary{cursor:pointer;font-weight:700;color:var(--deep)}
+.admin input[type=url]{width:100%;margin:8px 0 0;padding:10px 12px;border:1.5px solid var(--lilac);border-radius:10px;font:inherit;background:#fff;color:var(--ink)}
+.admin .row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px}
+.admin .btn{font-size:13px;padding:9px 18px}
+#status{min-height:18px;font-size:13px;margin-top:4px}
+#status.err{color:#c0334f}#status.ok{color:#3c8a5f}
+.stats{display:flex;align-items:center;gap:10px;width:min(92vw,460px);font-size:14px}
+.bar{flex:1;height:10px;border-radius:9px;background:#fff;box-shadow:inset 0 1px 3px rgba(0,0,0,.12);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#f9b5cc,#c9669b);transition:width .5s}
+.bw{padding:9px;border-radius:20px;background:rgba(255,255,255,.8);box-shadow:0 14px 40px rgba(180,90,140,.25)}
+#board{position:relative;border-radius:12px;overflow:hidden;background:#f6e9fb;touch-action:manipulation}
+.piece{position:absolute;width:33.3333%;height:33.3333%;padding:2px;cursor:pointer;transition:left .45s cubic-bezier(.5,0,.2,1),top .45s cubic-bezier(.5,0,.2,1)}
+.piece i{display:block;width:100%;height:100%;background-size:100% 100%;border-radius:9px;transition:transform .25s,box-shadow .25s,border-radius .8s}
+.piece:hover i{filter:brightness(1.05)}
+.piece.sel{z-index:5}
+.piece.sel i{transform:scale(.94);box-shadow:0 0 0 3px #fff,0 0 20px 7px rgba(255,110,165,.85)}
+#full{position:absolute;inset:0;background-size:100% 100%;opacity:0;transition:opacity 1s;pointer-events:none;z-index:6}
+#board.joined .piece{padding:0}#board.joined .piece i{border-radius:0}
+#board.joined #full{opacity:1}
+#board.joined{animation:glow 1.4s ease-out}
+@keyframes glow{40%{box-shadow:0 0 60px 20px rgba(255,230,160,.9)}}
+#win{min-height:50px;font-family:'Playfair Display',serif;font-size:19px;color:var(--deep);opacity:0;transform:translateY(8px);transition:.7s}
+#win.show{opacity:1;transform:none}
+/* gift */
+.gift{position:relative;width:210px;height:210px;margin:34px 0 14px;isolation:isolate;animation:shake 2.2s infinite}
+@keyframes shake{0%,60%,100%{transform:rotate(0)}65%{transform:rotate(-5deg)}70%{transform:rotate(5deg)}75%{transform:rotate(-3deg)}80%{transform:rotate(3deg)}85%{transform:rotate(0)}}
+.glow{position:absolute;inset:-50px;border-radius:50%;background:radial-gradient(circle,rgba(255,238,170,.95),rgba(255,180,210,0) 65%);opacity:.35;z-index:-1;transition:opacity .6s,transform .8s;animation:pl 2s infinite}
+@keyframes pl{50%{opacity:.6}}
+.gbox{position:absolute;bottom:0;left:15px;width:180px;height:132px;border-radius:4px 4px 14px 14px;background:linear-gradient(135deg,#f7a9c4,#d9648f);box-shadow:0 16px 30px rgba(180,60,110,.35)}
+.gbox::after,.glid::after{content:"";position:absolute;left:50%;margin-left:-16px;width:32px;top:0;bottom:0;background:linear-gradient(90deg,#f3dc9f,#fff3cf,#f3dc9f)}
+.glid{position:absolute;bottom:126px;left:5px;width:200px;height:50px;border-radius:10px;background:linear-gradient(135deg,#f9b5cc,#e47ca4);z-index:2;box-shadow:0 6px 12px rgba(150,40,90,.25);transition:transform .8s cubic-bezier(.2,1.5,.4,1),opacity .6s .55s}
+.glid i{position:absolute;top:-36px;width:50px;height:40px;border:9px solid #e8c97d;border-radius:50%;z-index:3}
+.glid .l{left:50%;margin-left:-54px;transform:rotate(-28deg)}.glid .r{left:50%;margin-left:4px;transform:rotate(28deg)}
+.glid .k{top:-12px;left:50%;margin-left:-14px;width:28px;height:26px;background:#f3dc9f;border:0;border-radius:50%}
+.gift.open{animation:none}
+.gift.open .glid{transform:translateY(-130px) rotate(-16deg);opacity:0}
+.gift.open .glow{opacity:1;transform:scale(1.9);animation:none}
+.gift.vanish{animation:vanish 1s forwards}
+@keyframes vanish{to{transform:scale(.1);opacity:0;filter:blur(8px) brightness(2)}}
+/* wheel */
+.ww{position:relative;width:max(240px,min(84vw,380px,calc(100svh - 340px)));aspect-ratio:1;margin-top:18px}
+#wheelRot{width:100%;height:100%;border-radius:50%;box-shadow:0 18px 40px rgba(150,50,100,.35),0 0 0 8px rgba(255,255,255,.7);will-change:transform}
+#wheelRot svg{width:100%;height:100%;display:block}
+.ptr{position:absolute;top:-24px;left:50%;margin-left:-17px;width:34px;height:44px;z-index:3;filter:drop-shadow(0 3px 4px rgba(120,30,70,.45))}
+#wheel path.win{stroke:#fff;stroke-width:4;animation:wp .8s infinite alternate}
+@keyframes wp{to{filter:brightness(1.12) drop-shadow(0 0 10px #ffd978)}}
+#wmsg{min-height:48px;font-weight:700;line-height:1.4;max-width:400px}
+/* final */
+.frame{position:relative;padding:14px;border-radius:6px;background:linear-gradient(135deg,#f7e3a8,#cfa650 30%,#f9eec4 55%,#c19a45);box-shadow:0 20px 50px rgba(120,70,40,.35);animation:fin 1.4s cubic-bezier(.2,.9,.3,1) both,sw 6s 1.5s ease-in-out infinite;transform-origin:top center}
+.frame::before{content:"♥";position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:34px;color:var(--rose);text-shadow:0 2px 6px rgba(0,0,0,.2)}
+.mat{background:#fffaf3;padding:14px;box-shadow:inset 0 0 10px rgba(0,0,0,.25)}
+#fimg{display:block;max-width:min(70vw,340px);max-height:42vh;box-shadow:0 0 0 1px rgba(0,0,0,.1)}
+@keyframes fin{from{opacity:0;transform:scale(.7) translateY(30px)}}
+@keyframes sw{50%{transform:rotate(1.2deg)}}
+.thanks{font-size:15px;line-height:1.6;max-width:400px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-iteration-count:1!important}}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<canvas id="fx"></canvas>
+
+<section class="screen active" id="s-puzzle"><div class="wrap">
+  <div class="script">✿ for you ✿</div>
+  <h1>A Little Gift For You</h1>
+  <p class="sub">Hãy hoàn thành bức tranh để khám phá món quà bí mật nhé!</p>
+  <p class="how">Chạm vào một mảnh để chọn (mảnh sẽ viền sáng), rồi chạm mảnh thứ hai để hoán đổi vị trí. Chạm lại mảnh đang chọn để bỏ chọn.</p>
+  <details class="admin"><summary>⚙ Khu vực quản trị</summary>
+    <input type="url" id="puzUrl" placeholder="URL ảnh ghép hình (https://...)">
+    <div class="row"><button class="btn" id="mk">Tạo trò chơi</button><label class="btn ghost" style="cursor:pointer">Chọn ảnh từ máy<input type="file" id="puzFile" accept="image/*" hidden></label></div>
+    <input type="url" id="frmUrl" placeholder="URL ảnh cho khung quà cuối (không bắt buộc)">
+    <div id="status"></div>
+  </details>
+  <div class="stats"><span>Lượt đi: <b id="moves">0</b></span><div class="bar"><i id="prog"></i></div><b id="pct">0%</b></div>
+  <div class="bw"><div id="board"></div></div>
+  <div id="win">Congratulations! Bạn đã hoàn thành bức tranh rồi!</div>
+  <button class="btn ghost" id="shuf">Chơi lại</button>
+</div></section>
+
+<section class="screen" id="s-gift"><div class="wrap">
+  <h2>Bạn đã mở khóa được một món quà bí mật!</h2>
+  <div class="gift" id="gift"><div class="glow"></div><div class="glid"><i class="l"></i><i class="r"></i><i class="k"></i></div><div class="gbox"></div></div>
+  <button class="btn big" id="openBtn">MỞ QUÀ NGAY</button>
+</div></section>
+
+<section class="screen" id="s-wheel"><div class="wrap">
+  <h2>Vòng quay may mắn</h2>
+  <div class="ww"><div class="ptr"><svg viewBox="0 0 34 44"><path d="M17 44 L3 14 A17 17 0 1 1 31 14 Z" fill="#c9669b" stroke="#fff" stroke-width="3"/><circle cx="17" cy="16" r="5" fill="#fff"/></svg></div><div id="wheelRot"><svg id="wheel" viewBox="-210 -210 420 420"></svg></div></div>
+  <div id="wmsg"></div>
+  <button class="btn big" id="spinBtn">QUAY NGAY</button>
+  <div id="spinCnt" style="font-size:13px;opacity:.75">Lượt quay: 0/2</div>
+</div></section>
+
+<section class="screen" id="s-final"><div class="wrap">
+  <div class="script">A little memory, just for you.</div>
+  <div class="frame"><div class="mat"><img id="fimg" alt="Khung ảnh kỷ niệm"></div></div>
+  <p class="thanks">Cảm ơn bạn đã chơi cùng. Chúc bạn luôn thật hạnh phúc, bình yên và được yêu thương mỗi ngày.</p>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+    <label class="btn ghost" style="cursor:pointer">Đổi ảnh trong khung<input type="file" id="frmFile" accept="image/*" hidden></label>
+    <button class="btn" id="again">Chơi lại từ đầu</button>
+  </div>
+</div></section>
+
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const S={full:'',aspect:1,els:[],order:[],sel:null,moves:0,locked:true,spins:0,spinning:false,rot:0,frameUrl:''};
+
+/* ===== Hiệu ứng nền, confetti ===== */
+(function(){const b=$('bg'),g=['♥','✿','✦','❀'];for(let i=0;i<22;i++){const s=document.createElement('span');s.className='fl';s.textContent=g[i%4];s.style.cssText=`left:${Math.random()*100}%;font-size:${12+Math.random()*18}px;animation-duration:${9+Math.random()*10}s;animation-delay:${-Math.random()*18}s`;b.appendChild(s)}})();
+const cv=$('fx'),cx=cv.getContext('2d');let P=[],running=false;
+const COL=['#f58fb3','#f9c6d8','#d9b66a','#c8a6ee','#ffffff','#ff9ec0'];
+function rsz(){cv.width=innerWidth;cv.height=innerHeight}
+function burst(x,y,n,o={}){for(let i=0;i<n;i++){const a=Math.random()*6.283,s=(o.s||9)*(.4+Math.random());P.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-(o.up||3),r:6+Math.random()*9,rot:Math.random()*6,vr:(Math.random()-.5)*.3,l:1,d:.007+Math.random()*.008,c:COL[i%COL.length],k:o.k||['r','h','s'][i%3]})}loop()}
+function loop(){if(running)return;running=true;(function f(){cx.clearRect(0,0,cv.width,cv.height);P=P.filter(p=>p.l>0&&p.y<cv.height+40);for(const p of P){p.vy+=.22;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;p.l-=p.d;cx.save();cx.globalAlpha=Math.max(p.l,0);cx.translate(p.x,p.y);cx.rotate(p.rot);cx.fillStyle=p.c;if(p.k==='r')cx.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);else{cx.font=p.r*1.8+'px sans-serif';cx.textAlign='center';cx.textBaseline='middle';cx.fillText(p.k==='h'?'♥':'✦',0,0)}cx.restore()}
+if(P.length)requestAnimationFrame(f);else{running=false;cx.clearRect(0,0,cv.width,cv.height)}})()}
+function rain(ms,k){const t=setInterval(()=>burst(Math.random()*innerWidth,-10,6,{s:3,up:-2,k}),120);setTimeout(()=>clearInterval(t),ms)}
+
+/* ===== Chuyển cảnh ===== */
+function go(id){const cur=document.querySelector('.screen.active'),nx=$(id);if(!cur){nx.classList.add('active');return}
+cur.classList.add('out');setTimeout(()=>{cur.classList.remove('active','out');nx.classList.add('active');nx.scrollTop=0},450)}
+
+/* ===== 1. Tải ảnh ===== */
+function loadImage(url){return new Promise((res,rej)=>{const i=new Image();i.crossOrigin='anonymous';const t=setTimeout(()=>rej('timeout'),15000);
+i.onload=()=>{clearTimeout(t);res(i)};i.onerror=()=>{clearTimeout(t);rej('load')};i.src=url})}
+function validUrl(u){try{const x=new URL(u);return /^(https?:|data:|blob:)$/.test(x.protocol)}catch(e){return false}}
+function makeDefault(){const c=document.createElement('canvas');c.width=c.height=900;const x=c.getContext('2d');
+const g=x.createLinearGradient(0,0,900,900);g.addColorStop(0,'#ffd6e4');g.addColorStop(.5,'#f1d8f7');g.addColorStop(1,'#ffeccc');x.fillStyle=g;x.fillRect(0,0,900,900);
+for(let i=0;i<46;i++){x.fillStyle=`rgba(255,255,255,${.15+Math.random()*.35})`;x.beginPath();x.arc(Math.random()*900,Math.random()*900,10+Math.random()*55,0,7);x.fill()}
+x.shadowColor='rgba(170,60,110,.4)';x.shadowBlur=40;x.fillStyle='#e0709a';x.beginPath();x.moveTo(450,740);x.bezierCurveTo(90,470,190,110,450,300);x.bezierCurveTo(710,110,810,470,450,740);x.fill();
+x.shadowBlur=0;x.fillStyle='#fff';x.textAlign='center';x.textBaseline='middle';x.font='italic 700 120px "Playfair Display",Georgia,serif';x.fillText('For You',450,410);
+x.font='56px serif';x.fillText('✦  ✿  ✦',450,530);x.fillStyle='#a94571';x.font='46px "Dancing Script",cursive';x.fillText('a little gift',450,850);
+return c.toDataURL('image/png')}
+
+/* ===== 2. Cắt ảnh bằng Canvas (9 mảnh đồng kích thước, đúng tỉ lệ) ===== */
+function sliceImage(img){const sc=Math.min(1,900/img.naturalWidth),W=Math.round(img.naturalWidth*sc),H=Math.round(img.naturalHeight*sc);
+const pw=Math.floor(W/3),ph=Math.floor(H/3),sw=img.naturalWidth/3,sh=img.naturalHeight/3,tiles=[];
+for(let r=0;r<3;r++)for(let c=0;c<3;c++){const k=document.createElement('canvas');k.width=pw;k.height=ph;k.getContext('2d').drawImage(img,c*sw,r*sh,sw,sh,0,0,pw,ph);tiles.push(k.toDataURL('image/jpeg',.92))} // tiles[i]: số thứ tự gốc i+1
+const f=document.createElement('canvas');f.width=pw*3;f.height=ph*3;f.getContext('2d').drawImage(img,0,0,pw*3,ph*3);
+return{tiles,full:f.toDataURL('image/jpeg',.92),aspect:(pw*3)/(ph*3)}}
+
+function status(msg,cls){const s=$('status');s.textContent=msg;s.className=cls||''}
+async function createGame(url,silent){
+  if(!validUrl(url)){status('URL chưa hợp lệ. Hãy nhập đường dẫn ảnh bắt đầu bằng http:// hoặc https://.','err');return}
+  status('Đang tải ảnh…');
+  try{const img=await loadImage(url);const d=sliceImage(img);
+    S.full=d.full;S.aspect=d.aspect;buildBoard(d.tiles);status(silent?'':'Đã tạo trò chơi mới!','ok')}
+  catch(e){const m=e==='timeout'?'Tải ảnh quá lâu. Hãy thử URL khác.':e==='load'?'Không tải được ảnh. Kiểm tra lại đường dẫn, hoặc website chứa ảnh đang chặn truy cập từ trang khác (CORS). Bạn có thể dùng “Chọn ảnh từ máy”.':'Ảnh bị chặn bởi CORS nên không thể cắt. Hãy dùng ảnh từ máy hoặc website cho phép truy cập.';status(m,'err')}}
+
+/* ===== 3. Bảng ghép hình ===== */
+function buildBoard(tiles){const b=$('board');b.innerHTML='<div id="full"></div>';b.classList.remove('joined');$('win').classList.remove('show');
+$('full').style.backgroundImage=`url(${S.full})`;
+S.els=tiles.map((t,id)=>{const e=document.createElement('div');e.className='piece';e.dataset.n=id+1;e.innerHTML='<i></i>';e.firstChild.style.backgroundImage=`url(${t})`;e.onclick=()=>pick(id);b.appendChild(e);return e});
+fitBoard();newShuffle()}
+function fitBoard(){const w=Math.max(220,Math.min(innerWidth*.88,460,(innerHeight-330)*S.aspect));const b=$('board');b.style.width=w+'px';b.style.aspectRatio=S.aspect}
+function shuffleOrder(){const a=[0,1,2,3,4,5,6,7,8];do{for(let i=8;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}}while(isSolved(a));return a}
+function isSolved(a){return a.every((v,i)=>v===i)}
+function newShuffle(){S.order=shuffleOrder();S.sel=null;S.moves=0;S.locked=false;$('board').classList.remove('joined');$('win').classList.remove('show');render()}
+function render(){S.order.forEach((id,slot)=>{const e=S.els[id];e.style.left=(slot%3)*100/3+'%';e.style.top=Math.floor(slot/3)*100/3+'%';e.classList.toggle('sel',S.sel===id)});
+const ok=S.order.filter((v,i)=>v===i).length,p=Math.round(ok/9*100);$('moves').textContent=S.moves;$('prog').style.width=p+'%';$('pct').textContent=p+'%'}
+function pick(id){if(S.locked)return;
+  if(S.sel===null)S.sel=id;else if(S.sel===id)S.sel=null;
+  else{const a=S.order.indexOf(S.sel),b=S.order.indexOf(id);[S.order[a],S.order[b]]=[S.order[b],S.order[a]];S.sel=null;S.moves++}
+  render();if(isSolved(S.order))winPuzzle()}
+function winPuzzle(){S.locked=true;setTimeout(()=>{$('board').classList.add('joined');const r=$('board').getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,90,{s:13,up:6});rain(2200);$('win').classList.add('show')},500);
+  setTimeout(()=>{if(S.locked&&isSolved(S.order))go('s-gift')},3600)}
+
+/* ===== 4. Hộp quà ===== */
+function openGift(){const g=$('gift');if(g.classList.contains('open'))return;$('openBtn').disabled=true;g.classList.add('open');
+const r=g.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+70;
+setTimeout(()=>{burst(x,y,80,{s:14,up:7});burst(x,y,30,{k:'s',s:9,up:5})},350);
+setTimeout(()=>g.classList.add('vanish'),1500);setTimeout(()=>go('s-wheel'),2500)}
+
+/* ===== 5. Vòng quay: 8 ô, mỗi ô 45°, ô i chiếm [i*45, i*45+45) tính theo chiều kim đồng hồ từ đỉnh ===== */
+const LUCK={t:['Chúc bạn may','mắn lần sau'],e:'🍀',c:'#f7eefb'};
+const PRIZES=[LUCK,{t:['Một bó','hoa'],e:'💐',c:'#f9b9cf'},LUCK,{t:['Một','gấu bông'],e:'🧸',c:'#fcd5b5'},LUCK,{t:['Một khung','ảnh'],e:'🖼️',c:'#e2b4f0'},LUCK,{t:['Một lời','chúc'],e:'💌',c:'#ffc9d9'}];
+const TARGET1=2,TARGET2=5; // lượt 1: ô "Chúc bạn may mắn lần sau"; lượt 2: ô "Một khung ảnh"
+function pt(a,r){const t=a*Math.PI/180;return(r*Math.sin(t)).toFixed(2)+' '+(-r*Math.cos(t)).toFixed(2)}
+function buildWheel(){let h='';
+PRIZES.forEach((p,i)=>{const a0=i*45,a1=a0+45,c=a0+22.5;
+h+=`<path id="sec${i}" d="M0 0 L${pt(a0,200)} A200 200 0 0 1 ${pt(a1,200)} Z" fill="${p.c}" stroke="#fff" stroke-width="2"/>
+<g transform="rotate(${c})"><text transform="translate(0,-46) rotate(-90)" font-size="13" font-weight="700" fill="#8a3f64" font-family="Quicksand,sans-serif"><tspan x="0" y="-2">${p.t[0]}</tspan><tspan x="0" y="12">${p.t[1]}</tspan></text><text transform="translate(0,-168)" font-size="26" text-anchor="middle" dominant-baseline="central">${p.e}</text></g>`});
+for(let i=0;i<8;i++)h+=`<circle cx="${pt(i*45,203).split(' ')[0]}" cy="${pt(i*45,203).split(' ')[1]}" r="4" fill="#fff"/>`;
+h+='<circle r="204" fill="none" stroke="#d9b66a" stroke-width="7"/><circle r="30" fill="#fff" stroke="#d9b66a" stroke-width="4"/><text text-anchor="middle" dominant-baseline="central" font-size="26" fill="#e0709a">♥</text>';
+$('wheel').innerHTML=h}
+function sectorUnderPointer(){const a=(((360-(S.rot%360))%360)+360)%360;return Math.floor(a/45)} // kim chỉ ở góc 0° (đỉnh)
+function spin(){if(S.spinning||S.spins>=2)return;
+  S.spinning=true;const idx=S.spins===0?TARGET1:TARGET2;S.spins++;
+  $('spinBtn').disabled=true;$('wmsg').textContent='';$('spinCnt').textContent=`Lượt quay: ${S.spins}/2`;
+  const c=idx*45+22.5,j=(Math.random()-.5)*20,want=(((360-(c+j))%360)+360)%360,cur=((S.rot%360)+360)%360; // lệch ±10° vẫn nằm trong ô
+  S.rot+=360*6+((want-cur+360)%360);
+  const w=$('wheelRot');w.style.transition='transform 5.4s cubic-bezier(.35,0,.12,1)';w.style.transform=`rotate(${S.rot}deg)`;
+  setTimeout(()=>endSpin(idx),5550)}
+function endSpin(idx){const got=sectorUnderPointer();if(got!==idx)console.warn('Lệch ô',got,idx);
+  if(S.spins===1){$('wmsg').textContent='Ôi, chưa may mắn lắm rồi! Nhưng bạn vẫn còn một cơ hội nữa đó!';$('spinBtn').textContent='QUAY LẦN 2';$('spinBtn').disabled=false;S.spinning=false;return}
+  $('wmsg').textContent='Chúc mừng! Bạn đã nhận được một món quà đặc biệt!';$('spinBtn').textContent='ĐÃ HẾT LƯỢT QUAY';$('spinBtn').disabled=true;
+  $('sec'+got).classList.add('win');rain(2800,'h');burst(innerWidth/2,innerHeight/2,50,{k:'h',s:11,up:6});
+  setTimeout(()=>{S.spinning=false;showFinal()},3600)}
+
+/* ===== 6. Màn hình cuối ===== */
+function showFinal(){const im=$('fimg');im.onerror=()=>{im.onerror=null;im.src=S.full};im.src=S.frameUrl||S.full;go('s-final')}
+function resetAll(){S.spins=0;S.spinning=false;S.rot=0;
+  const w=$('wheelRot');w.style.transition='none';w.style.transform='rotate(0deg)';
+  document.querySelectorAll('#wheel path.win').forEach(p=>p.classList.remove('win'));
+  $('spinBtn').disabled=false;$('spinBtn').textContent='QUAY NGAY';$('wmsg').textContent='';$('spinCnt').textContent='Lượt quay: 0/2';
+  $('gift').className='gift';$('openBtn').disabled=false;newShuffle();go('s-puzzle')}
+
+/* ===== Khởi tạo ===== */
+$('mk').onclick=()=>{S.frameUrl=$('frmUrl').value.trim();createGame($('puzUrl').value.trim())};
+$('puzFile').onchange=e=>{const f=e.target.files[0];if(f){S.frameUrl=$('frmUrl').value.trim();createGame(URL.createObjectURL(f))}};
+$('frmUrl').onchange=()=>{S.frameUrl=$('frmUrl').value.trim()};
+$('frmFile').onchange=e=>{const f=e.target.files[0];if(f){S.frameUrl=URL.createObjectURL(f);$('fimg').src=S.frameUrl}};
+$('shuf').onclick=newShuffle;$('openBtn').onclick=openGift;$('spinBtn').onclick=spin;$('again').onclick=resetAll;
+addEventListener('resize',()=>{rsz();fitBoard()});
+rsz();buildWheel();createGame(makeDefault(),true);
+</script>
+</body>
+</html>
